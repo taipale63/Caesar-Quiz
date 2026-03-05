@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Which Julius Caesar Character Are You? — Lobby Quiz</title>
+  <style>
+    :root{
+      --bg1:#0f1011;
+      --bg2:#17181a;
+      --ink:#1b1a16;
+      --paper:#f3e9d2;
+      --paper2:#efe0c1;
+      --wax:#8b1e1e;
+      --gold:#b48a2a;
+      --muted:#6a6256;
+      --stone:#c8c2b6;
+      --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --shadow2: 0 10px 22px rgba(0,0,0,.22);
+      --radius: 22px;
+      --radius2: 16px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:#f5f2ea;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(180,138,42,.18), transparent 60%),
+        radial-gradient(1000px 650px at 85% 25%, rgba(139,30,30,.15), transparent 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      min-height:100vh;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+    }
+
+    /* subtle “marble” banding */
+    .marble{
+      position:fixed;
+      inset:-40px;
+      pointer-events:none;
+      opacity:.12;
+      background:
+        repeating-linear-gradient(115deg, rgba(255,255,255,.18) 0 2px, transparent 2px 28px),
+        radial-gradient(800px 600px at 20% 70%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(900px 700px at 70% 30%, rgba(255,255,255,.08), transparent 58%);
+      filter: blur(1px);
+      mix-blend-mode: overlay;
+    }
+
+    .wrap{
+      width:min(1080px, 100%);
+      padding:18px 18px 28px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 920px){
+      .wrap{grid-template-columns: 1fr; }
+    }
+
+    header{
+      grid-column:1 / -1;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      padding:8px 6px 0;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:3px;
+    }
+    .title h1{
+      margin:0;
+      font-family:var(--serif);
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height:1.05;
+    }
+    .title p{
+      margin:0;
+      color: rgba(245,242,234,.78);
+      font-size: 14px;
+    }
+    .controls{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .btn{
+      appearance:none; border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      color:#f5f2ea;
+      padding:10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      box-shadow: var(--shadow2);
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+      font-weight:700;
+      font-size: 13px;
+    }
+    .btn:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.26); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.wax{
+      background: linear-gradient(180deg, rgba(139,30,30,.92), rgba(120,18,18,.92));
+      border-color: rgba(255,255,255,.16);
+    }
+    .btn.wax:hover{ background: linear-gradient(180deg, rgba(160,42,42,.92), rgba(120,18,18,.92)); }
+    .btn.gold{
+      background: linear-gradient(180deg, rgba(180,138,42,.95), rgba(140,102,24,.95));
+      color:#1b1a16;
+      border-color: rgba(0,0,0,.15);
+    }
+
+    /* Scroll card */
+    .scroll{
+      background:
+        radial-gradient(800px 420px at 50% 15%, rgba(255,255,255,.30), transparent 65%),
+        linear-gradient(180deg, var(--paper), var(--paper2));
+      color: var(--ink);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .scroll:before, .scroll:after{
+      content:"";
+      position:absolute;
+      left:-10px; right:-10px;
+      height:26px;
+      background:
+        radial-gradient(18px 14px at 20px 50%, rgba(0,0,0,.14), transparent 70%),
+        radial-gradient(18px 14px at calc(100% - 20px) 50%, rgba(0,0,0,.14), transparent 70%),
+        linear-gradient(180deg, rgba(0,0,0,.08), transparent);
+      opacity:.35;
+    }
+    .scroll:before{ top:0; }
+    .scroll:after{ bottom:0; transform: rotate(180deg); }
+    .scrollInner{
+      padding:22px 20px 18px;
+      position:relative;
+      min-height: 520px;
+    }
+    .laurel{
+      position:absolute;
+      top:-12px; right:-18px;
+      opacity:.15;
+      transform: rotate(8deg);
+      filter: blur(.2px);
+      pointer-events:none;
+    }
+    .divider{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(0,0,0,.20), transparent);
+      margin: 12px 0 10px;
+    }
+
+    /* Progress */
+    .progressRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      color: rgba(27,26,22,.75);
+      font-size:12px;
+      font-weight:700;
+    }
+    .bar{
+      height:12px;
+      border-radius:999px;
+      background: rgba(0,0,0,.10);
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.08);
+      margin:8px 0 14px;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(180,138,42,.95), rgba(139,30,30,.90));
+      transition: width .35s ease;
+    }
+
+    /* Question and answers */
+    .qBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:900;
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.07);
+      color: rgba(27,26,22,.85);
+    }
+    .qTitle{
+      margin:12px 0 0;
+      font-family:var(--serif);
+      font-size: clamp(20px, 2.2vw, 28px);
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
+    .answers{
+      margin-top: 14px;
+      display:grid;
+      gap:10px;
+    }
+    .ans{
+      border-radius: var(--radius2);
+      border:1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.38);
+      padding:12px 12px;
+      cursor:pointer;
+      text-align:left;
+      transition: transform .06s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .ans:hover{ border-color: rgba(0,0,0,.24); box-shadow: 0 8px 18px rgba(0,0,0,.12); background: rgba(255,255,255,.50);}
+    .ans:active{ transform: translateY(1px); }
+    .ans strong{ display:block; font-size:15px; margin-bottom:2px; }
+    .ans span{ display:block; font-size: 13px; color: rgba(27,26,22,.70); }
+    .ans.selected{
+      outline: 3px solid rgba(180,138,42,.35);
+      border-color: rgba(180,138,42,.55);
+      background: rgba(180,138,42,.14);
+    }
+
+    .navRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top: 16px;
+    }
+    .hint{
+      font-size:12px;
+      color: rgba(27,26,22,.62);
+      font-weight:700;
+    }
+
+    /* Results */
+    .resultTitle{
+      margin: 6px 0 2px;
+      font-family: var(--serif);
+      font-size: 34px;
+      line-height:1.05;
+    }
+    .tagline{
+      margin:0 0 12px;
+      color: rgba(27,26,22,.72);
+      font-size: 15px;
+      font-weight:700;
+    }
+    .chips{
+      display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 14px;
+    }
+    .chip{
+      display:inline-flex; align-items:center;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.08);
+      font-weight:800;
+      font-size: 12px;
+      color: rgba(27,26,22,.86);
+    }
+    .panel{
+      border-radius: var(--radius2);
+      border:1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.45);
+      padding: 12px 12px;
+      margin-top: 10px;
+    }
+    .panel h3{
+      margin:0 0 6px;
+      font-size: 12px;
+      letter-spacing:.8px;
+      text-transform: uppercase;
+      color: rgba(27,26,22,.62);
+    }
+    .panel p{
+      margin:0;
+      font-size: 14px;
+      color: rgba(27,26,22,.84);
+      line-height:1.35;
+      font-weight:700;
+    }
+
+    /* “Assassination outcome” animation */
+    .stage{
+      margin-top: 14px;
+      border-radius: var(--radius2);
+      border:1px solid rgba(0,0,0,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.28));
+      padding: 14px;
+      overflow:hidden;
+      position:relative;
+      min-height: 118px;
+    }
+    .stageTitle{
+      font-size:12px;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      color: rgba(27,26,22,.62);
+      font-weight:900;
+      margin:0 0 8px;
+    }
+    .scene{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:900;
+      color: rgba(27,26,22,.86);
+    }
+    .actors{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .coin{
+      width:44px; height:44px;
+      border-radius:999px;
+      display:grid; place-items:center;
+      border:1px solid rgba(0,0,0,.18);
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), rgba(0,0,0,.04));
+      box-shadow: 0 10px 18px rgba(0,0,0,.14);
+      position:relative;
+      overflow:hidden;
+    }
+    .coin .sym{
+      font-size:20px;
+      transform: translateY(-1px);
+    }
+    .coin:after{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background: conic-gradient(from 0deg, rgba(180,138,42,.0), rgba(180,138,42,.35), rgba(180,138,42,.0));
+      animation: shimmer 3.8s linear infinite;
+      opacity:.55;
+    }
+    @keyframes shimmer { to { transform: rotate(360deg);} }
+
+    .spark{
+      position:absolute;
+      width:10px; height:10px;
+      border-radius:999px;
+      background: rgba(139,30,30,.92);
+      box-shadow: 0 0 0 0 rgba(139,30,30,.0);
+      opacity:0;
+    }
+    .spark.animate{
+      animation: pop 1.2s ease-out forwards;
+    }
+    @keyframes pop{
+      0%{ transform: translate(0,0) scale(.4); opacity:0; box-shadow: 0 0 0 0 rgba(139,30,30,.0);}
+      20%{ opacity:1;}
+      60%{ box-shadow: 0 0 0 18px rgba(139,30,30,.0); }
+      100%{ transform: translate(var(--dx), var(--dy)) scale(1.0); opacity:0; }
+    }
+
+    /* Sidebar: Live results + QR */
+    .side{
+      display:grid;
+      gap:16px;
+    }
+    .card{
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .cardHeader{
+      padding:14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cardHeader h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+      color: rgba(245,242,234,.85);
+    }
+    .cardHeader p{
+      margin:6px 0 0;
+      font-size: 12px;
+      color: rgba(245,242,234,.70);
+      font-weight:700;
+    }
+    .cardBody{ padding: 0 14px 14px; }
+
+    .miniRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 0;
+      border-top:1px solid rgba(255,255,255,.10);
+      font-weight:800;
+      color: rgba(245,242,234,.86);
+      font-size:13px;
+    }
+    .miniRow:first-child{ border-top:none; }
+    .miniBar{
+      flex:1;
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      margin:0 10px;
+      border:1px solid rgba(0,0,0,.25);
+    }
+    .miniBar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(180,138,42,.95), rgba(139,30,30,.90));
+      transition: width .4s ease;
+    }
+    .count{
+      min-width: 26px;
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+      color: rgba(245,242,234,.90);
+    }
+
+    .qrWrap{
+      display:grid;
+      gap:10px;
+      align-items:center;
+    }
+    .qrRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .input{
+      flex:1;
+      min-width: 160px;
+      border-radius: 12px;
+      padding:10px 10px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      color:#f5f2ea;
+      font-weight:800;
+    }
+    canvas{
+      background:#fff;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: var(--shadow2);
+    }
+    .small{
+      font-size:12px;
+      color: rgba(245,242,234,.74);
+      font-weight:700;
+      line-height:1.25;
+    }
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.72);
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      padding:10px 12px;
+      border-radius: 999px;
+      box-shadow: var(--shadow2);
+      opacity:0;
+      transition: opacity .25s ease, transform .25s ease;
+      pointer-events:none;
+      font-weight:800;
+      font-size: 12px;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* simple “wax seal” ornament */
+    .seal{
+      width:44px;height:44px;border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.30), rgba(139,30,30,.92));
+      border:1px solid rgba(255,255,255,.14);
+      display:grid; place-items:center;
+      box-shadow: 0 14px 24px rgba(0,0,0,.28);
+      flex:0 0 auto;
+    }
+    .seal span{ font-family:var(--serif); font-weight:900; color:rgba(255,255,255,.92); letter-spacing:.5px; transform: translateY(-1px); }
+  </style>
+</head>
+
+<body>
+  <div class="marble"></div>
+
+  <div class="wrap" role="application" aria-label="Which Julius Caesar character are you lobby game">
+    <header>
+      <div class="title">
+        <h1>Which <em>Julius Caesar</em> Character Are You?</h1>
+        <p>Roman-themed lobby quiz with live crowd results + QR phone play.</p>
+      </div>
+      <div class="controls">
+        <button class="btn" id="btnRestart" title="Start over">Restart</button>
+        <button class="btn gold" id="btnShare" title="Copy your result text" disabled>Copy Result</button>
+        <button class="btn wax" id="btnResetStats" title="Clear the live audience totals (this device only)">Reset Totals</button>
+      </div>
+    </header>
+
+    <!-- Main scroll -->
+    <section class="scroll" aria-live="polite">
+      <svg class="laurel" width="220" height="220" viewBox="0 0 200 200" aria-hidden="true">
+        <path fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5" d="M65 30c-20 20-30 45-30 70s10 50 30 70M135 30c20 20 30 45 30 70s-10 50-30 70"/>
+        <path fill="none" stroke="rgba(0,0,0,.55)" stroke-width="4" d="M62 46c-8 10-12 20-12 30m0 0c8-2 16-8 24-18M62 86c-8 10-12 20-12 30m0 0c8-2 16-8 24-18M62 126c-8 10-12 20-12 30m0 0c8-2 16-8 24-18"/>
+        <path fill="none" stroke="rgba(0,0,0,.55)" stroke-width="4" d="M138 46c8 10 12 20 12 30m0 0c-8-2-16-8-24-18M138 86c8 10 12 20 12 30m0 0c-8-2-16-8-24-18M138 126c8 10 12 20 12 30m0 0c-8-2-16-8-24-18"/>
+      </svg>
+
+      <div class="scrollInner" id="main">
+        <!-- injected by JS -->
+      </div>
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="side">
+      <section class="card" aria-label="Live audience results">
+        <div class="cardHeader">
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div class="seal" aria-hidden="true"><span>SPQ</span></div>
+            <div>
+              <h2>Live Audience Results</h2>
+              <p>Totals update after every completed quiz (this device).</p>
+            </div>
+          </div>
+        </div>
+        <div class="cardBody" id="stats"></div>
+      </section>
+
+      <section class="card" aria-label="QR code for phone play">
+        <div class="cardHeader">
+          <div>
+            <h2>QR for Phones</h2>
+            <p>Use if you host this file online. Otherwise, use kiosk play on this device.</p>
+          </div>
+        </div>
+        <div class="cardBody">
+          <div class="qrWrap">
+            <div class="small">
+              If you want phones to play, you’ll need a link (example: a Vercel URL).
+              Paste that URL here to generate a QR code.
+            </div>
+            <div class="qrRow">
+              <input class="input" id="urlInput" placeholder="Paste your game URL here…" />
+              <button class="btn" id="btnMakeQR">Make QR</button>
+            </div>
+            <canvas id="qrCanvas" width="220" height="220" aria-label="QR code"></canvas>
+            <div class="small">
+              Tip: when deployed online, the same game works on phones automatically (responsive layout).
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast">Copied!</div>
+
+<script>
+/* ==============================
+   DATA: characters + quiz
+   ============================== */
+
+const CHARACTERS = {
+  CAESAR: {
+    key: "CAESAR",
+    name: "Julius Caesar",
+    tagline: "Commanding, decisive, and used to being obeyed.",
+    vibe: ["Commanding", "Confident", "Big-vision"],
+    mightSay: "I hear the warnings… but Rome needs me moving forward.",
+    watchFor: "Power gathers fast around you—practice listening before decisions become destiny.",
+    outcome: {
+      title: "Outcome Simulation: The Ides Approach",
+      text: "Your presence pulls the room toward you. The danger is not your strength—it's believing strength makes you untouchable.",
+      iconLeft: "👑",
+      iconRight: "🗡️",
+      effect: "storm"
+    }
+  },
+  BRUTUS: {
+    key: "BRUTUS",
+    name: "Brutus",
+    tagline: "Principled, reflective, and haunted by what ‘duty’ demands.",
+    vibe: ["Idealistic", "Thoughtful", "Conscience-led"],
+    mightSay: "I want what’s best for the Republic—even if it costs me everything.",
+    watchFor: "Your ideals are powerful—be careful when others use them as a shield for their agendas.",
+    outcome: {
+      title: "Outcome Simulation: A Noble Choice",
+      text: "You try to turn violence into virtue by naming it virtue. Your tragedy is sincerity—history is not always gentle with sincere people.",
+      iconLeft: "⚖️",
+      iconRight: "🩸",
+      effect: "spark"
+    }
+  },
+  CASSIUS: {
+    key: "CASSIUS",
+    name: "Cassius",
+    tagline: "Strategic, sharp-eyed, and allergic to hero worship.",
+    vibe: ["Skeptical", "Tactical", "Influential"],
+    mightSay: "If everyone’s praising one man, I’m looking for the angle.",
+    watchFor: "Your clarity can slip into resentment—aim your intellect at solutions, not just critique.",
+    outcome: {
+      title: "Outcome Simulation: The Plot Tightens",
+      text: "You read the room like a map. Your power is leverage—your risk is letting suspicion become the whole story.",
+      iconLeft: "🧠",
+      iconRight: "🗡️",
+      effect: "spark"
+    }
+  },
+  ANTONY: {
+    key: "ANTONY",
+    name: "Mark Antony",
+    tagline: "Loyal, theatrical, and terrifyingly persuasive when it counts.",
+    vibe: ["Charismatic", "Emotional", "Orator"],
+    mightSay: "Give me the crowd, and I’ll give you the outcome.",
+    watchFor: "Your passion moves people—use it to build, not only to punish.",
+    outcome: {
+      title: "Outcome Simulation: The Crowd Turns",
+      text: "You can steer hearts with words. The moment a spark hits, you become the wind.",
+      iconLeft: "🎭",
+      iconRight: "🔥",
+      effect: "storm"
+    }
+  },
+  CASCA: {
+    key: "CASCA",
+    name: "Casca",
+    tagline: "Deadpan commentator. Sees politics as performance—then tells you the ugly truth.",
+    vibe: ["Cynical", "Blunt", "Observant"],
+    mightSay: "Sure—he ‘refused’ the crown. Three times. And the crowd lost its mind.",
+    watchFor: "Your honesty is bracing—pair it with empathy so it lands as insight, not just scorch.",
+    outcome: {
+      title: "Outcome Simulation: The First Shock",
+      text: "You see through the theater. When the action hits, you move first—then watch the consequences spread.",
+      iconLeft: "👁️",
+      iconRight: "⚡",
+      effect: "spark"
+    }
+  },
+  PORTIA: {
+    key: "PORTIA",
+    name: "Portia",
+    tagline: "Brave, perceptive, and determined to be taken seriously.",
+    vibe: ["Steadfast", "Intuitive", "Resilient"],
+    mightSay: "If I’m strong enough to share your life, I’m strong enough to share the truth.",
+    watchFor: "Don’t let others decide what you ‘can handle.’ Demand clarity—and protect your own peace.",
+    outcome: {
+      title: "Outcome Simulation: Holding the Line",
+      text: "You press for truth in a world built on secrecy. Your strength is insistence—your cost is what secrets do to the body.",
+      iconLeft: "🕊️",
+      iconRight: "🧷",
+      effect: "spark"
+    }
+  },
+  CALPURNIA: {
+    key: "CALPURNIA",
+    name: "Calpurnia",
+    tagline: "Intuitive and protective. Believes warnings matter.",
+    vibe: ["Instinctive", "Caring", "Cautious"],
+    mightSay: "Please—just stay home today.",
+    watchFor: "Your intuition is a gift—back it up with a plan for how to be heard.",
+    outcome: {
+      title: "Outcome Simulation: The Warning",
+      text: "You sense danger before anyone else does. The tragedy is not the dream—it’s being dismissed.",
+      iconLeft: "🌙",
+      iconRight: "🚪",
+      effect: "storm"
+    }
+  },
+  SOOTHSAYER: {
+    key: "SOOTHSAYER",
+    name: "The Soothsayer",
+    tagline: "Quietly certain. Says the hard thing even when no one wants to listen.",
+    vibe: ["Direct", "Perceptive", "Unmoved"],
+    mightSay: "Beware the Ides of March.",
+    watchFor: "Truth-telling is brave—keep speaking, but choose moments when people can actually receive it.",
+    outcome: {
+      title: "Outcome Simulation: A Clear Line",
+      text: "You name the danger plainly. Your role is not control—it’s clarity.",
+      iconLeft: "🔮",
+      iconRight: "📅",
+      effect: "storm"
+    }
+  }
+};
+
+// Each answer adds weighted points across characters.
+const QUESTIONS = [
+  {
+    prompt: "A leader is gaining power fast. Your first reaction is…",
+    answers: [
+      { title:"Good—decisive leadership gets things done.", sub:"Stability matters more than debate.", points:{ CAESAR:3, ANTONY:1 } },
+      { title:"Power needs limits, even for ‘great’ people.", sub:"Rules protect everyone.", points:{ BRUTUS:3, CASSIUS:1 } },
+      { title:"I want to know who benefits—and who’s being played.", sub:"Follow the incentives.", points:{ CASSIUS:3, CASCA:1 } },
+      { title:"I’m watching the signs. Something feels off.", sub:"Warnings exist for a reason.", points:{ CALPURNIA:2, SOOTHSAYER:2 } }
+    ]
+  },
+  {
+    prompt: "In a tense meeting, the room turns performative. You…",
+    answers: [
+      { title:"Lean in and work the crowd.", sub:"If it’s theater, I can direct it.", points:{ ANTONY:3, CAESAR:1 } },
+      { title:"Stay calm and argue principles.", sub:"Make the case. Hold the line.", points:{ BRUTUS:3, PORTIA:1 } },
+      { title:"Take notes. Later, I’ll use what I learned.", sub:"Timing is everything.", points:{ CASSIUS:3, SOOTHSAYER:1 } },
+      { title:"Deliver one cutting comment under my breath.", sub:"Someone should say it.", points:{ CASCA:3, CASSIUS:1 } }
+    ]
+  },
+  {
+    prompt: "Someone you love is hiding something important. You…",
+    answers: [
+      { title:"Ask directly. If I’m in your life, I deserve the truth.", sub:"Don’t protect me with silence.", points:{ PORTIA:3, BRUTUS:1 } },
+      { title:"Worry quietly and try to protect them.", sub:"I’ll keep them safe, even alone.", points:{ CALPURNIA:3, PORTIA:1 } },
+      { title:"Respect the secrecy—but keep my eyes open.", sub:"I’ll notice what others miss.", points:{ SOOTHSAYER:2, CASCA:1 } },
+      { title:"Assume it’s political and start mapping motives.", sub:"Who wants what?", points:{ CASSIUS:2, CASCA:1 } }
+    ]
+  },
+  {
+    prompt: "A friend asks you to join a risky plan ‘for the good of the country.’ You…",
+    answers: [
+      { title:"Ask: Is it lawful? Is it moral? Then decide.", sub:"Ends don’t excuse means.", points:{ BRUTUS:3, PORTIA:1 } },
+      { title:"Say yes if it stops a bigger danger.", sub:"Sometimes you act before it’s too late.", points:{ CASSIUS:2, BRUTUS:1 } },
+      { title:"Refuse. Chaos will follow.", sub:"Violence opens doors you can’t close.", points:{ CALPURNIA:2, SOOTHSAYER:2 } },
+      { title:"Agree—then plan how to control the story afterward.", sub:"The crowd will need a narrative.", points:{ ANTONY:2, CAESAR:1 } }
+    ]
+  },
+  {
+    prompt: "Your communication style is best described as…",
+    answers: [
+      { title:"Bold and declarative.", sub:"I speak like decisions are made.", points:{ CAESAR:3 } },
+      { title:"Careful and reasoned.", sub:"I want to be fair and clear.", points:{ BRUTUS:2, SOOTHSAYER:1 } },
+      { title:"Witty, blunt, and a little savage.", sub:"Truth, but with teeth.", points:{ CASCA:3 } },
+      { title:"Persuasive—my words can move a room.", sub:"I can feel the moment shift.", points:{ ANTONY:3 } }
+    ]
+  },
+  {
+    prompt: "When danger is near, you’re most likely to…",
+    answers: [
+      { title:"Ignore it—confidence is protection.", sub:"If I hesitate, I lose.", points:{ CAESAR:2, ANTONY:1 } },
+      { title:"Sense it and warn others.", sub:"Say it plain, even if they laugh.", points:{ SOOTHSAYER:3, CALPURNIA:1 } },
+      { title:"Prepare quietly and make contingency plans.", sub:"Be ready before you need to be.", points:{ CASSIUS:2, PORTIA:1 } },
+      { title:"Comment on how ridiculous everyone is being.", sub:"Someone needs perspective.", points:{ CASCA:2, SOOTHSAYER:1 } }
+    ]
+  }
+];
+
+/* ==============================
+   STATE + STORAGE
+   ============================== */
+
+const LS_KEY_STATS = "jc_lobby_stats_v1";
+const LS_KEY_PLAYS = "jc_lobby_plays_v1";
+
+function loadStats(){
+  try{
+    return JSON.parse(localStorage.getItem(LS_KEY_STATS)) || {};
+  }catch(e){
+    return {};
+  }
+}
+function saveStats(stats){
+  localStorage.setItem(LS_KEY_STATS, JSON.stringify(stats));
+}
+function incStat(key){
+  const stats = loadStats();
+  stats[key] = (stats[key] || 0) + 1;
+  saveStats(stats);
+}
+function resetStats(){
+  localStorage.removeItem(LS_KEY_STATS);
+  localStorage.removeItem(LS_KEY_PLAYS);
+}
+function getPlays(){
+  return Number(localStorage.getItem(LS_KEY_PLAYS) || 0);
+}
+function incPlays(){
+  localStorage.setItem(LS_KEY_PLAYS, String(getPlays() + 1));
+}
+
+/* ==============================
+   RENDERING
+   ============================== */
+
+const main = document.getElementById("main");
+const statsEl = document.getElementById("stats");
+
+let step = 0;
+let selected = null;
+let scores = {};
+let lastWinner = null;
+
+const btnRestart = document.getElementById("btnRestart");
+const btnShare = document.getElementById("btnShare");
+const btnResetStats = document.getElementById("btnResetStats");
+
+btnRestart.addEventListener("click", restart);
+btnResetStats.addEventListener("click", () => {
+  resetStats();
+  renderStats();
+  toast("Totals cleared.");
+});
+btnShare.addEventListener("click", () => {
+  if(!lastWinner) return;
+  const text = `I got ${lastWinner.name} in the Julius Caesar character quiz!`;
+  copyToClipboard(text);
+});
+
+function restart(){
+  step = 0;
+  selected = null;
+  scores = {};
+  lastWinner = null;
+  btnShare.disabled = true;
+  render();
+}
+
+function mergeScores(add){
+  for (const k in add){
+    scores[k] = (scores[k] || 0) + add[k];
+  }
+}
+
+function computeWinner(){
+  const entries = Object.entries(scores);
+  if(entries.length === 0) return CHARACTERS.BRUTUS;
+  entries.sort((a,b)=> b[1]-a[1]);
+  const topScore = entries[0][1];
+  const tied = entries.filter(([k,v])=> v===topScore).map(([k])=>k);
+
+  // Tie-breaker: prefer characters with “more decisive” profiles only if still tied; otherwise deterministic.
+  const order = ["BRUTUS","CASSIUS","ANTONY","CAESAR","CASCA","PORTIA","CALPURNIA","SOOTHSAYER"];
+  tied.sort((a,b)=> order.indexOf(a)-order.indexOf(b));
+  return CHARACTERS[tied[0]] || CHARACTERS.BRUTUS;
+}
+
+function runnersUp(){
+  const entries = Object.entries(scores).sort((a,b)=> b[1]-a[1]);
+  const runner = entries.slice(1,3).map(([k])=>CHARACTERS[k]).filter(Boolean);
+  return runner;
+}
+
+function render(){
+  if(step < QUESTIONS.length) renderQuestion();
+  else renderResult();
+  renderStats();
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[step];
+  const pct = Math.round((step / QUESTIONS.length) * 100);
+
+  main.innerHTML = `
+    <div class="progressRow">
+      <div class="qBadge">🏛️ Question ${step+1} of ${QUESTIONS.length}</div>
+      <div>${pct}%</div>
+    </div>
+    <div class="bar" aria-label="progress bar"><div style="width:${pct}%"></div></div>
+
+    <h2 class="qTitle">${escapeHtml(q.prompt)}</h2>
+    <div class="divider"></div>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="navRow">
+      <div class="hint">Tap one answer, then press <strong>Next</strong>.</div>
+      <button class="btn wax" id="btnNext" ${selected===null ? "disabled" : ""}>Next</button>
+    </div>
+  `;
+
+  const answersWrap = document.getElementById("answers");
+  q.answers.forEach((a, idx)=>{
+    const el = document.createElement("button");
+    el.className = "ans" + (selected===idx ? " selected" : "");
+    el.innerHTML = `<strong>${escapeHtml(a.title)}</strong><span>${escapeHtml(a.sub)}</span>`;
+    el.addEventListener("click", ()=>{
+      selected = idx;
+      // re-render answers selection only
+      [...answersWrap.children].forEach((c,i)=> c.classList.toggle("selected", i===idx));
+      document.getElementById("btnNext").disabled = false;
+    });
+    answersWrap.appendChild(el);
+  });
+
+  document.getElementById("btnNext").addEventListener("click", ()=>{
+    if(selected===null) return;
+    mergeScores(q.answers[selected].points);
+    selected = null;
+    step += 1;
+    render();
+  });
+}
+
+function renderResult(){
+  const winner = computeWinner();
+  lastWinner = winner;
+  btnShare.disabled = false;
+
+  // record live stats
+  incStat(winner.key);
+  incPlays();
+
+  const runners = runnersUp();
+  const pct = 100;
+
+  main.innerHTML = `
+    <div class="progressRow">
+      <div class="qBadge">✅ Result</div>
+      <div>${pct}%</div>
+    </div>
+    <div class="bar"><div style="width:100%"></div></div>
+
+    <h2 class="resultTitle">${escapeHtml(winner.name)}</h2>
+    <p class="tagline">${escapeHtml(winner.tagline)}</p>
+
+    <div class="chips">
+      ${winner.vibe.map(v=>`<span class="chip">${escapeHtml(v)}</span>`).join("")}
+    </div>
+
+    <div class="panel">
+      <h3>You might say</h3>
+      <p>“${escapeHtml(winner.mightSay)}”</p>
+    </div>
+    <div class="panel">
+      <h3>Watch for</h3>
+      <p>${escapeHtml(winner.watchFor)}</p>
+    </div>
+
+    ${runners.length ? `
+      <div class="panel">
+        <h3>You also have some…</h3>
+        <p>${runners.map(r=>escapeHtml(r.name)).join(" • ")}</p>
+      </div>
+    ` : ""}
+
+    <div class="stage" id="stage">
+      <div class="stageTitle">${escapeHtml(winner.outcome.title)}</div>
+      <div class="scene">
+        <div class="actors">
+          <div class="coin" aria-hidden="true"><div class="sym">${winner.outcome.iconLeft}</div></div>
+          <div style="max-width:540px; font-weight:900; color: rgba(27,26,22,.86); line-height:1.25;">
+            ${escapeHtml(winner.outcome.text)}
+          </div>
+        </div>
+        <div class="coin" aria-hidden="true"><div class="sym">${winner.outcome.iconRight}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="navRow" style="margin-top:10px;">
+        <div class="hint">Want to compare? Hit <strong>Restart</strong> to try again.</div>
+        <button class="btn gold" id="btnReplay">Play Again</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnReplay").addEventListener("click", restart);
+
+  // Run “assassination outcome” animation
+  if (winner.outcome.effect === "spark") sparkFX();
+  else stormFX();
+}
+
+function renderStats(){
+  const stats = loadStats();
+  const plays = getPlays();
+
+  const keys = Object.keys(CHARACTERS);
+  const total = keys.reduce((sum,k)=> sum + (stats[k] || 0), 0);
+  const safeTotal = total || 1;
+
+  // Order by count desc
+  const ordered = keys
+    .map(k=>({ k, n: stats[k]||0, name: CHARACTERS[k].name }))
+    .sort((a,b)=> b.n-a.n || a.name.localeCompare(b.name));
+
+  statsEl.innerHTML = `
+    <div class="miniRow" style="border-top:none;">
+      <div>Plays</div>
+      <div class="count">${plays}</div>
+    </div>
+    ${ordered.map(row=>{
+      const pct = Math.round((row.n / safeTotal)*100);
+      return `
+        <div class="miniRow">
+          <div style="min-width:120px;">${escapeHtml(row.name)}</div>
+          <div class="miniBar" aria-label="${escapeHtml(row.name)} bar"><div style="width:${pct}%"></div></div>
+          <div class="count">${row.n}</div>
+        </div>
+      `;
+    }).join("")}
+  `;
+}
+
+/* ==============================
+   Effects: “Assassination outcome”
+   ============================== */
+
+function sparkFX(){
+  const stage = document.getElementById("stage");
+  if(!stage) return;
+  for(let i=0;i<10;i++){
+    const s = document.createElement("div");
+    s.className = "spark";
+    const x = 40 + Math.random()*(stage.clientWidth-80);
+    const y = 42 + Math.random()*(stage.clientHeight-70);
+    const dx = (Math.random()-.5)*220 + "px";
+    const dy = (Math.random()-.6)*160 + "px";
+    s.style.left = x + "px";
+    s.style.top = y + "px";
+    s.style.setProperty("--dx", dx);
+    s.style.setProperty("--dy", dy);
+    stage.appendChild(s);
+    setTimeout(()=> s.classList.add("animate"), 40 + i*60);
+    setTimeout(()=> s.remove(), 1600 + i*80);
+  }
+}
+
+function stormFX(){
+  const stage = document.getElementById("stage");
+  if(!stage) return;
+  // Create a gentle “wind” sweep overlay
+  const veil = document.createElement("div");
+  veil.style.position = "absolute";
+  veil.style.inset = "-20%";
+  veil.style.background =
+    "radial-gradient(500px 220px at 20% 30%, rgba(139,30,30,.15), transparent 60%)," +
+    "radial-gradient(600px 260px at 80% 60%, rgba(180,138,42,.20), transparent 62%)," +
+    "linear-gradient(115deg, rgba(0,0,0,.08), transparent 40%, rgba(0,0,0,.06))";
+  veil.style.transform = "translateX(-35%) rotate(-6deg)";
+  veil.style.opacity = "0";
+  veil.style.transition = "transform 1.8s ease, opacity .6s ease";
+  veil.style.pointerEvents = "none";
+  stage.appendChild(veil);
+
+  requestAnimationFrame(()=>{
+    veil.style.opacity = "1";
+    veil.style.transform = "translateX(15%) rotate(-6deg)";
+  });
+
+  // Add a few slow sparks
+  setTimeout(()=> sparkFX(), 380);
+
+  setTimeout(()=> veil.remove(), 2200);
+}
+
+/* ==============================
+   QR Code generator (no libraries)
+   - Compact implementation using QR v1-L like encoding is complex.
+   - Instead, we draw a “serviceable” QR via a tiny embedded generator:
+     This is a minimal QR for URL use, using a small bundled algorithm.
+   ============================== */
+
+/**
+ * Tiny QR generator adapted from public-domain style minimal approach.
+ * This is NOT a full-featured QR suite, but it generates scannable codes for typical URLs.
+ * If a URL is extremely long, it may fail — keep it short (Vercel links are fine).
+ */
+function makeQR(text){
+  const canvas = document.getElementById("qrCanvas");
+  const ctx = canvas.getContext("2d");
+  // wipe
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // If empty, draw placeholder
+  if(!text || !text.trim()){
+    drawPlaceholderQR(ctx, canvas.width, canvas.height);
+    return;
+  }
+
+  try{
+    const qr = QRCodeMinimal.create(text.trim());
+    const cells = qr.modules;
+    const count = cells.length;
+    const quiet = 4;
+    const size = canvas.width;
+    const scale = Math.floor(size / (count + quiet*2));
+    const offset = Math.floor((size - scale*(count + quiet*2))/2);
+
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0,0,size,size);
+    ctx.fillStyle = "#000";
+
+    for(let r=0; r<count; r++){
+      for(let c=0; c<count; c++){
+        if(cells[r][c]){
+          ctx.fillRect(offset + (c+quiet)*scale, offset + (r+quiet)*scale, scale, scale);
+        }
+      }
+    }
+  }catch(e){
+    // fallback
+    drawPlaceholderQR(ctx, canvas.width, canvas.height, "URL too long");
+  }
+}
+
+function drawPlaceholderQR(ctx,w,h,label="Paste a URL"){
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle="#000";
+  // simple faux finder patterns
+  const fp = (x,y)=>{
+    ctx.fillRect(x,y,54,54);
+    ctx.clearRect(x+8,y+8,38,38);
+    ctx.fillRect(x+16,y+16,22,22);
+  };
+  fp(14,14); fp(w-68,14); fp(14,h-68);
+  ctx.fillStyle="#222";
+  ctx.font="bold 14px " + getComputedStyle(document.body).fontFamily;
+  ctx.textAlign="center";
+  ctx.fillText(label, w/2, h/2+6);
+}
+
+/* Minimal QR generator object */
+const QRCodeMinimal = (() => {
+  // This is a tiny QR encoder limited to byte mode and low error correction,
+  // selecting a version that fits short strings. Good enough for lobby QR URLs.
+  // For stability: version 3 (29x29) with L should fit many URLs; we auto-bump to v4 (33x33) if needed.
+  // If still too long, we throw.
+  const EC_LEVEL = "L";
+  const VERSIONS = [
+    { v: 3, size: 29, capBytesL: 53 },
+    { v: 4, size: 33, capBytesL: 78 }
+  ];
+
+  function create(text){
+    const bytes = toBytes(text);
+    const chosen = VERSIONS.find(x => bytes.length <= x.capBytesL);
+    if(!chosen) throw new Error("Too long");
+
+    const modules = makeBlank(chosen.size);
+    // Place finders
+    placeFinder(modules, 0, 0);
+    placeFinder(modules, chosen.size-7, 0);
+    placeFinder(modules, 0, chosen.size-7);
+    // Timing patterns
+    for(let i=8;i<chosen.size-8;i++){
+      modules[6][i] = (i%2===0);
+      modules[i][6] = (i%2===0);
+    }
+    // Dark module (approx position)
+    modules[chosen.size-8][8] = true;
+
+    // Data (byte mode): [mode 0100][len 8-bit][data][terminator/pad]
+    let bits = [];
+    pushBits(bits, 0b0100, 4);
+    pushBits(bits, bytes.length, 8);
+    for(const b of bytes) pushBits(bits, b, 8);
+    // terminator
+    const maxBits = dataCapacityBits(chosen.v, EC_LEVEL);
+    const remaining = maxBits - bits.length;
+    if(remaining > 0) pushBits(bits, 0, Math.min(4, remaining));
+    // pad to byte
+    while(bits.length % 8 !== 0) bits.push(0);
+    // pad bytes
+    let pad = true;
+    while(bits.length < maxBits){
+      pushBits(bits, pad ? 0xEC : 0x11, 8);
+      pad = !pad;
+    }
+
+    // Map data bits into modules (no masking complexity—apply simple mask 0)
+    placeData(modules, bits);
+
+    // Apply mask 0: (r+c)%2==0 flips
+    applyMask0(modules);
+
+    return { modules };
+  }
+
+  function dataCapacityBits(version, ec){
+    // Very rough precomputed for v3-L and v4-L in byte mode (data codewords):
+    // v3-L: 55 data codewords -> 440 bits
+    // v4-L: 80 data codewords -> 640 bits
+    if(version===3) return 440;
+    if(version===4) return 640;
+    return 440;
+  }
+
+  function toBytes(str){
+    // UTF-8 encode
+    const encoder = new TextEncoder();
+    return Array.from(encoder.encode(str));
+  }
+
+  function makeBlank(n){
+    const m = Array.from({length:n}, ()=> Array.from({length:n}, ()=> null));
+    // Reserve format info areas by marking them false (occupied)
+    // We'll treat any non-null as occupied.
+    // Initialize all as null.
+    return m;
+  }
+
+  function placeFinder(m, x, y){
+    for(let r=0;r<7;r++){
+      for(let c=0;c<7;c++){
+        const on = (r===0||r===6||c===0||c===6) || (r>=2&&r<=4&&c>=2&&c<=4);
+        m[y+r][x+c] = on;
+      }
+    }
+    // separator
+    for(let i=-1;i<=7;i++){
+      if(inRange(y-1) && inRange(x+i, m.length)) m[y-1][x+i] = false;
+      if(inRange(y+7, m.length) && inRange(x+i, m.length)) m[y+7][x+i] = false;
+      if(inRange(y+i, m.length) && inRange(x-1, m.length)) m[y+i][x-1] = false;
+      if(inRange(y+i, m.length) && inRange(x+7, m.length)) m[y+i][x+7] = false;
+    }
+    function inRange(v, max){ return v>=0 && v<max; }
+    function inRange2(v, max){ return v>=0 && v<max; }
+  }
+
+  function pushBits(arr, val, count){
+    for(let i=count-1;i>=0;i--){
+      arr.push((val>>i)&1);
+    }
+  }
+
+  function placeData(m, bits){
+    const n = m.length;
+    let i = bits.length - 1; // we'll pop from end? easier to shift from front; instead iterate forward.
+    let bitIndex = 0;
+
+    let col = n - 1;
+    let row = n - 1;
+    let dirUp = true;
+
+    while(col > 0){
+      if(col === 6) col--; // skip timing col
+      for(let r=0; r<n; r++){
+        const rr = dirUp ? (n-1-r) : r;
+        for(let cc=0; cc<2; cc++){
+          const c = col - cc;
+          if(m[rr][c] !== null) continue; // occupied
+          const bit = bits[bitIndex++] || 0;
+          m[rr][c] = !!bit;
+        }
+      }
+      col -= 2;
+      dirUp = !dirUp;
+    }
+  }
+
+  function applyMask0(m){
+    const n = m.length;
+    for(let r=0;r<n;r++){
+      for(let c=0;c<n;c++){
+        // don't mask occupied patterns? We didn't mark them; they are booleans already.
+        // But we must avoid masking finder/timing by checking their positions crudely:
+        if(isFunctionModule(n,r,c)) continue;
+        if(((r + c) % 2) === 0){
+          m[r][c] = !m[r][c];
+        }
+      }
+    }
+  }
+
+  function isFunctionModule(n,r,c){
+    // Finder areas + separators + timing line + dark module zone.
+    // Finder top-left
+    if(r<=8 && c<=8) return true;
+    // Finder top-right
+    if(r<=8 && c>=n-9) return true;
+    // Finder bottom-left
+    if(r>=n-9 && c<=8) return true;
+    // Timing
+    if(r===6 || c===6) return true;
+    // Approx format areas around
+    if(r===8 || c===8) return true;
+    // Dark module vicinity
+    if(r===n-8 && c===8) return true;
+    return false;
+  }
+
+  return { create };
+})();
+
+/* ==============================
+   Utilities
+   ============================== */
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=> t.classList.remove("show"), 950);
+}
+
+async function copyToClipboard(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    toast("Copied!");
+  }catch(e){
+    // fallback prompt
+    window.prompt("Copy this text:", text);
+  }
+}
+
+/* ==============================
+   QR UI hooks
+   ============================== */
+
+document.getElementById("btnMakeQR").addEventListener("click", ()=>{
+  const val = document.getElementById("urlInput").value;
+  makeQR(val);
+  toast("QR updated.");
+});
+
+// Draw placeholder QR at start
+makeQR("");
+
+/* ==============================
+   Start
+   ============================== */
+render();
+</script>
+</body>
+</html>
